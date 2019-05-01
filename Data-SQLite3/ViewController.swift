@@ -17,13 +17,18 @@ class ViewController: UIViewController {
         var stmt: OpaquePointer? = nil      // 컴파일된 SQL을 담을 객체
         
         // 앱 내 문서 디렉터리 경로에서 SQLite DB 파일을 찾는다
-//        let fileMgr = FileManager()
-//        let docPathURL = fileMgr.urls(for: .documentDirectory, in: .userDomainMask).first!
-//        let dbPath = docPathURL.appendingPathComponent("db.sqlite").path
+        let fileMgr = FileManager()
+        let docPathURL = fileMgr.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let dbPath = docPathURL.appendingPathComponent("db.sqlite").path
         
-        let dbPath = "/Users/yunseongho/db.sqlite"
+        // dbPath 경로에 파일이 없다면 앱 번들에서 만들어 둔 db.sqlite를 가져와 복사한다.
+        if fileMgr.fileExists(atPath: dbPath) == false {    // dbPath 경로에 파일 유무를 체크
+            let dbSource = Bundle.main.path(forResource: "db", ofType: "sqlite")    // 앱 번들에 포함된 db.sqlite 파일의 경로를 읽어온다
+            try! fileMgr.copyItem(atPath: dbSource!, toPath: dbPath)    // dbPath에 db.sqlite 파일을 복사한다
+        }
         
         let sql = "CREATE TABLE IF NOT EXISTS sequence (num INTEGER)"
+        
         
         if sqlite3_open(dbPath, &db) == SQLITE_OK { // DB 연결이 성공하면
             
